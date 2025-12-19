@@ -1,21 +1,18 @@
-// import styles from "./Map.module.css";import React from "react";
-
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
   useMap,
-  useMapEvent,
+  useMapEvents,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import React from "react";
 import { useCities } from "../contexts/CitiesContext";
-import { useState, useEffect } from "react";
-import { map } from "leaflet";
 import useGeolocation from "../hooks/useGeolocation";
 import Button from "./Button";
+import { useUrlPosition } from "../hooks/useUrlPosition";
 
 function Map() {
   const [mapPosition, setMapPosition] = useState([40, 0]);
@@ -25,16 +22,16 @@ function Map() {
     position: geolocationPosition,
     getPosition,
   } = useGeolocation();
-  const [searchParams] = useSearchParams();
 
-  let mapLat = searchParams.get("lat");
-  let mapLng = searchParams.get("lng");
+  const { mapLat, mapLng } = useUrlPosition();
+
   useEffect(
     function () {
       if (mapLat && mapLng) setMapPosition([mapLat, mapLng]);
     },
     [mapLat, mapLng]
   );
+
   useEffect(
     function () {
       if (geolocationPosition)
@@ -42,19 +39,21 @@ function Map() {
     },
     [geolocationPosition]
   );
+
   return (
     <div
       style={{ height: "93.5vh", width: "100%" }}
-      className="text-center rounded-md"
+      className="text-center rounded-md relative"
     >
       {!geolocationPosition && (
         <Button
           onClick={getPosition}
-          className="absolute bottom-[4rem] left-1/2 z-[1000]  -translate-x-1/2 bg-[var(--color-brand--2)] px-4 py-2 text-[1.4rem] font-bold text-[var(--color-dark--1)] shadow-[0_0.4rem_1.2rem_rgba(36,42,46,0.15)]"
+          className="absolute bottom-[4rem] left-1/2 z-[1000] -translate-x-1/2 bg-[var(--color-brand--2)] px-4 py-2 text-[1.4rem] font-bold text-[var(--color-dark--1)] shadow-[0_0.4rem_1.2rem_rgba(36,42,46,0.15)]"
         >
           {isLoadingPosition ? "loading..." : "Use your position"}
         </Button>
       )}
+
       <MapContainer center={mapPosition} zoom={6} style={{ height: "100%" }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -71,6 +70,7 @@ function Map() {
             </Popup>
           </Marker>
         ))}
+
         <ChangeCenter position={mapPosition} />
         <DetectClick />
       </MapContainer>
@@ -81,14 +81,18 @@ function Map() {
 function ChangeCenter({ position }) {
   const map = useMap();
   map.setView(position);
+  return null;
 }
+
 function DetectClick() {
   const navigate = useNavigate();
-  useMapEvent({
+  useMapEvents({
     click: (e) => {
-      console.log(e);
-      navigate(`form?lat=${e.latlng.lat}$lng=${e.latlng.lng}`);
+      console.log("Map Clicked! Coordinates:", e.latlng);
+      navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`);
     },
   });
+  return null;
 }
+
 export default Map;
