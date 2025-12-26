@@ -42,7 +42,7 @@ export default function Homepage() {
           you have wandered the world.
         </h2>
         <Link
-          to="/app"
+          to="/login"
           className={`
             bg-green-600 hover:bg-green-700 text-white 
             font-semibold py-4 px-10 rounded-full 

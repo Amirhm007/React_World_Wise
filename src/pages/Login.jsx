@@ -1,14 +1,33 @@
-import React from "react";
+import React, { use, useEffect } from "react";
 import { useState } from "react";
 import PageNav from "../component/PageNav.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Authprovider, useAuth } from "../contexts/FakeAtuthContext.jsx";
+import Button from "../component/Button.jsx";
 
 export default function Login() {
   const [email, setEmail] = useState("jack@example.com");
   const [password, setPassword] = useState("qwerty");
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  function handleSubmit(e) {
+    e.preventDefault();
 
+    if (email && password) {
+      login(email, password);
+    }
+  }
+  useEffect(
+    function () {
+      if (isAuthenticated) {
+        navigate("/app", { replace: true });
+      }
+    },
+    [isAuthenticated, navigate]
+  );
   return (
     <main
+      onSubmit={handleSubmit}
       className={`
         m-10 p-10 lg:p-20 
         bg-gray-800 
@@ -62,14 +81,7 @@ export default function Login() {
             />
           </div>
 
-          <div>
-            <Link
-              to="/app"
-              className="bg-green-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-green-700 transition-colors duration-200 text-lg w-full"
-            >
-              Login
-            </Link>
-          </div>
+          <Button>Login</Button>
         </form>
       </div>
     </main>
